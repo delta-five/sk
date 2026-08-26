@@ -297,7 +297,7 @@ func TestResultMapSliceWithErrors(t *testing.T) {
 	}{
 		{
 			name:   "success",
-			r:      ga.MakeResult(slices.Collect(maps.Keys(errMap)), nil),
+			r:      ga.MakeResult(slices.Sorted(maps.Keys(errMap)), nil),
 			mapper: func(n int) (string, error) { return strconv.Itoa(n), nil },
 			want:   slices.Sorted(maps.Values(valMap)),
 		},
