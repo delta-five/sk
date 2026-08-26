@@ -16,6 +16,14 @@ func MakeResult[T any](val T, err error) Result[T] {
 	return Result[T]{val: val, err: err}
 }
 
+// MakePtrResult создаёт Result с указателем на переменную с типом параметра при пустом аргументе-ошибки.
+func MakePtrResult[T any](err error) Result[*T] {
+	if err == nil {
+		return Result[*T]{val: new(T)}
+	}
+	return Result[*T]{err: err}
+}
+
 // Unwrap возвращает хранимое значение и ошибку.
 func (r *Result[IN]) Unwrap() (IN, error) {
 	return r.val, r.err

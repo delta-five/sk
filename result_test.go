@@ -36,6 +36,28 @@ func TestMakeResult(t *testing.T) {
 	})
 }
 
+func TestMakePtrResult(t *testing.T) {
+	t.Parallel()
+
+	t.Run("without error", func(t *testing.T) {
+		t.Parallel()
+
+		r := ga.MakePtrResult[int](nil)
+		val, err := r.Unwrap()
+		require.NoError(t, err)
+		assert.NotNil(t, val)
+	})
+
+	t.Run("with error", func(t *testing.T) {
+		t.Parallel()
+
+		r := ga.MakePtrResult[int](assert.AnError)
+		val, err := r.Unwrap()
+		require.Nil(t, val)
+		assert.ErrorIs(t, err, assert.AnError)
+	})
+}
+
 func TestUnwrap(t *testing.T) {
 	t.Parallel()
 
