@@ -1,2 +1,2 @@
-# cat
-Common auxiliary tools
+# GA
+Go auxiliary tools (Golang auxiliaries)
