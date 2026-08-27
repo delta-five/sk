@@ -1,4 +1,4 @@
-module github.com/MirrorRu/ga
+module github.com/mirrorru/ga
 
 go 1.27
 
