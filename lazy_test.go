@@ -6,10 +6,9 @@ import (
 	"sync/atomic"
 	"testing"
 
+	"github.com/mirrorru/ga"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	ga "github.com/MirrorRu/ga"
 )
 
 func TestNewLazyFunc(t *testing.T) {
