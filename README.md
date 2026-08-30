@@ -4,11 +4,11 @@ Go auxiliary tools (Golang auxiliaries) — библиотека вспомог�
 на дженериках.
 
 ```bash
-go get github.com/MirrorRu/ga
+go get github.com/delta-five/ga
 ```
 
 ```go
-import ga "github.com/MirrorRu/ga"
+import ga "github.com/delta-five/ga"
 ```
 
 ## Монада `Result`

@@ -1,4 +1,4 @@
-module github.com/mirrorru/ga
+module github.com/delta-five/ga
 
 go 1.27
 
