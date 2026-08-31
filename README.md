@@ -1,14 +1,14 @@
-# GA
+# GSK (Go Swiss Knife)
 
-Go auxiliary tools (Golang auxiliaries) — библиотека вспомогательных функций общего назначения
+The Swiss Army Knife for Go development  — библиотека вспомогательных функций общего назначения
 на дженериках.
 
 ```bash
-go get github.com/delta-five/ga
+go get github.com/delta-five/gsk
 ```
 
 ```go
-import ga "github.com/delta-five/ga"
+import ga "github.com/delta-five/gsk"
 ```
 
 ## Монада `Result`

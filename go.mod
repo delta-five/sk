@@ -1,4 +1,4 @@
-module github.com/delta-five/ga
+module github.com/delta-five/gsk
 
 go 1.27
 
