@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/mirrorru/ga"
+	ga "github.com/delta-five/gsk"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

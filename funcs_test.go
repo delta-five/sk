@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	ga "github.com/MirrorRu/ga"
+	ga "github.com/delta-five/gsk"
 )
 
 func TestMapSlice(t *testing.T) {
@@ -23,7 +23,7 @@ func TestMapSlice(t *testing.T) {
 		{
 			name:   "empty slice",
 			in:     []int{},
-			mapper: func(n int) string { return strconv.Itoa(n) },
+			mapper: strconv.Itoa,
 			want:   []string{},
 		},
 		{
@@ -160,7 +160,7 @@ func TestMapSliceErrors(t *testing.T) {
 				require.Error(t, err)
 				assert.Nil(t, got)
 				for _, wantErr := range tt.wantErrors {
-					assert.ErrorIs(t, err, wantErr)
+					require.ErrorIs(t, err, wantErr)
 				}
 				return
 			}

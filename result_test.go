@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	ga "github.com/MirrorRu/ga"
+	ga "github.com/delta-five/gsk"
 )
 
 func TestMakeResult(t *testing.T) {
@@ -31,7 +31,7 @@ func TestMakeResult(t *testing.T) {
 
 		r := ga.MakeResult(0, assert.AnError)
 		val, err := r.Unwrap()
-		assert.Zero(t, val)
+		assert.Empty(t, val)
 		assert.ErrorIs(t, err, assert.AnError)
 	})
 }
@@ -125,8 +125,8 @@ func TestResultMap(t *testing.T) {
 			got := tt.r.Map(tt.mapper)
 			val, err := got.Unwrap()
 			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
-				assert.Zero(t, val)
+				require.ErrorIs(t, err, tt.wantErr)
+				assert.Empty(t, val)
 				return
 			}
 			require.NoError(t, err)
@@ -166,8 +166,8 @@ func TestResultMapSlice(t *testing.T) {
 			got := tt.r.Map(ga.NewSliceMapper(tt.mapper))
 			val, err := got.Unwrap()
 			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
-				assert.Zero(t, val)
+				require.ErrorIs(t, err, tt.wantErr)
+				assert.Empty(t, val)
 				return
 			}
 			require.NoError(t, err)
@@ -215,8 +215,8 @@ func TestResultMapWithError(t *testing.T) {
 			got := tt.r.MapWithError(tt.mapper)
 			val, err := got.Unwrap()
 			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
-				assert.Zero(t, val)
+				require.ErrorIs(t, err, tt.wantErr)
+				assert.Empty(t, val)
 				return
 			}
 			require.NoError(t, err)
@@ -262,8 +262,8 @@ func TestResultMapSliceWithError(t *testing.T) {
 			got := tt.r.MapWithError(ga.NewSliceMapperWithError(tt.mapper))
 			val, err := got.Unwrap()
 			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
-				assert.Zero(t, val)
+				require.ErrorIs(t, err, tt.wantErr)
+				assert.Empty(t, val)
 				return
 			}
 			require.NoError(t, err)
@@ -330,10 +330,10 @@ func TestResultMapSliceWithErrors(t *testing.T) {
 			if tt.wantErr != nil {
 				for _, e := range tt.wantErr {
 					if e != nil {
-						assert.ErrorIs(t, err, e)
+						require.ErrorIs(t, err, e)
 					}
 				}
-				assert.Zero(t, val)
+				assert.Empty(t, val)
 				return
 			}
 			require.NoError(t, err)
@@ -376,8 +376,8 @@ func TestResultMapWithContext(t *testing.T) {
 			got := tt.r.MapWithContext(tt.ctx, tt.mapper)
 			val, err := got.Unwrap()
 			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
-				assert.Zero(t, val)
+				require.ErrorIs(t, err, tt.wantErr)
+				assert.Empty(t, val)
 				return
 			}
 			require.NoError(t, err)
@@ -429,8 +429,8 @@ func TestResultMapWithContextError(t *testing.T) {
 			got := tt.r.MapWithContextError(tt.ctx, tt.mapper)
 			val, err := got.Unwrap()
 			if tt.wantErr != nil {
-				assert.ErrorIs(t, err, tt.wantErr)
-				assert.Zero(t, val)
+				require.ErrorIs(t, err, tt.wantErr)
+				assert.Empty(t, val)
 				return
 			}
 			require.NoError(t, err)
