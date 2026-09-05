@@ -1,4 +1,4 @@
-module github.com/delta-five/gsk
+module github.com/delta-five/sk
 
 go 1.27
 
