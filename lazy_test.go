@@ -1,4 +1,4 @@
-package ga_test
+package gsk_test
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	ga "github.com/delta-five/gsk"
+	"github.com/delta-five/gsk"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,7 +33,7 @@ func TestNewLazyFunc(t *testing.T) {
 			t.Parallel()
 
 			var calls atomic.Int32
-			lazy := ga.NewLazyFunc(func() int {
+			lazy := gsk.NewLazyFunc(func() int {
 				calls.Add(1)
 				return tt.want
 			})
@@ -54,7 +54,7 @@ func TestNewLazyFuncConcurrent(t *testing.T) {
 	t.Parallel()
 
 	var calls atomic.Int32
-	lazy := ga.NewLazyFunc(func() int {
+	lazy := gsk.NewLazyFunc(func() int {
 		calls.Add(1)
 		return 42
 	})
@@ -87,7 +87,7 @@ func TestNewLazyParamFunc(t *testing.T) {
 
 		var calls atomic.Int32
 		var captured atomic.Value
-		lazy := ga.NewLazyParamFunc(func(p int) int {
+		lazy := gsk.NewLazyParamFunc(func(p int) int {
 			calls.Add(1)
 			captured.Store(p)
 			return p * 2
@@ -110,7 +110,7 @@ func TestNewLazyParamFuncConcurrent(t *testing.T) {
 
 	var calls atomic.Int32
 	var captured atomic.Value
-	lazy := ga.NewLazyParamFunc(func(p int) int {
+	lazy := gsk.NewLazyParamFunc(func(p int) int {
 		calls.Add(1)
 		captured.Store(p)
 		return p * 2
@@ -138,7 +138,7 @@ func TestNewLazyParamFuncConcurrent(t *testing.T) {
 
 func ExampleNewLazyFunc() {
 	counter := 0
-	lazy := ga.NewLazyFunc(func() int {
+	lazy := gsk.NewLazyFunc(func() int {
 		counter++
 		return counter * 10
 	})
@@ -152,7 +152,7 @@ func ExampleNewLazyFunc() {
 
 func ExampleNewLazyParamFunc() {
 	calls := 0
-	lazy := ga.NewLazyParamFunc(func(p int) int {
+	lazy := gsk.NewLazyParamFunc(func(p int) int {
 		calls++
 		return p + calls
 	})

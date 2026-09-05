@@ -1,4 +1,4 @@
-package ga
+package gsk
 
 import (
 	"sync"
@@ -38,6 +38,19 @@ func NewLazyParamFunc[P any, T any](generator ParamValFunc[P, T]) ParamValFunc[P
 	return func(p P) T {
 		once.Do(func() {
 			value = generator(p)
+		})
+		return value
+	}
+}
+
+func NewLazyArgFunc[P any, T any](arg P, generator ParamValFunc[P, T]) ValFunc[T] {
+	var (
+		once  sync.Once
+		value T
+	)
+	return func() T {
+		once.Do(func() {
+			value = generator(arg)
 		})
 		return value
 	}

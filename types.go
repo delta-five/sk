@@ -1,3 +1,3 @@
-package ga
+package gsk
 
 type Nothing struct{}
