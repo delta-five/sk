@@ -24,6 +24,15 @@ p := sk.MakePtrResult[int](nil)    // Result[*int] с указателем на 
 p := sk.MakePtrResult[int](err)    // Result[*int] с ошибкой err
 ```
 
+### Распаковка значения
+
+`MustMake` и `MustMakePtr` извлекают значение, вызывая панику при ошибке:
+
+```go
+v := sk.MustMake(fetch())      // v типа int; паника при err != nil
+p := sk.MustMakePtr[int](err)  // p типа *int; паника при err != nil
+```
+
 ### Преобразования
 
 ```go

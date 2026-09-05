@@ -36,6 +36,45 @@ func TestMakeResult(t *testing.T) {
 	})
 }
 
+func TestMustMake(t *testing.T) {
+	t.Parallel()
+
+	t.Run("without error", func(t *testing.T) {
+		t.Parallel()
+
+		val := sk.MustMake(42, nil)
+		assert.Equal(t, 42, val)
+	})
+
+	t.Run("with error panics", func(t *testing.T) {
+		t.Parallel()
+
+		assert.PanicsWithValue(t, assert.AnError, func() {
+			sk.MustMake(0, assert.AnError)
+		})
+	})
+}
+
+func TestMustMakePtr(t *testing.T) {
+	t.Parallel()
+
+	t.Run("without error", func(t *testing.T) {
+		t.Parallel()
+
+		p := sk.MustMakePtr[int](nil)
+		require.NotNil(t, p)
+		assert.Equal(t, 0, *p)
+	})
+
+	t.Run("with error panics", func(t *testing.T) {
+		t.Parallel()
+
+		assert.PanicsWithValue(t, assert.AnError, func() {
+			sk.MustMakePtr[int](assert.AnError)
+		})
+	})
+}
+
 func TestMakePtrResult(t *testing.T) {
 	t.Parallel()
 
