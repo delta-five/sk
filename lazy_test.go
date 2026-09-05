@@ -1,4 +1,4 @@
-package ga_test
+package gsk_test
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	ga "github.com/delta-five/gsk"
+	"github.com/delta-five/gsk"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,7 +33,7 @@ func TestNewLazyFunc(t *testing.T) {
 			t.Parallel()
 
 			var calls atomic.Int32
-			lazy := ga.NewLazyFunc(func() int {
+			lazy := gsk.NewLazyFunc(func() int {
 				calls.Add(1)
 				return tt.want
 			})
@@ -54,7 +54,7 @@ func TestNewLazyFuncConcurrent(t *testing.T) {
 	t.Parallel()
 
 	var calls atomic.Int32
-	lazy := ga.NewLazyFunc(func() int {
+	lazy := gsk.NewLazyFunc(func() int {
 		calls.Add(1)
 		return 42
 	})
@@ -87,7 +87,7 @@ func TestNewLazyParamFunc(t *testing.T) {
 
 		var calls atomic.Int32
 		var captured atomic.Value
-		lazy := ga.NewLazyParamFunc(func(p int) int {
+		lazy := gsk.NewLazyParamFunc(func(p int) int {
 			calls.Add(1)
 			captured.Store(p)
 			return p * 2
@@ -110,7 +110,7 @@ func TestNewLazyParamFuncConcurrent(t *testing.T) {
 
 	var calls atomic.Int32
 	var captured atomic.Value
-	lazy := ga.NewLazyParamFunc(func(p int) int {
+	lazy := gsk.NewLazyParamFunc(func(p int) int {
 		calls.Add(1)
 		captured.Store(p)
 		return p * 2
@@ -136,9 +136,67 @@ func TestNewLazyParamFuncConcurrent(t *testing.T) {
 	assert.Equal(t, int32(1), calls.Load())
 }
 
+func TestNewLazyBoundFunc(t *testing.T) {
+	t.Parallel()
+
+	t.Run("computes value once with bound arg", func(t *testing.T) {
+		t.Parallel()
+
+		var calls atomic.Int32
+		var captured atomic.Value
+		lazy := gsk.NewLazyBoundFunc(5, func(p int) int {
+			calls.Add(1)
+			captured.Store(p)
+			return p * 2
+		})
+
+		first := lazy()
+		second := lazy()
+		third := lazy()
+
+		assert.Equal(t, 10, first)
+		assert.Equal(t, 10, second)
+		assert.Equal(t, 10, third)
+		assert.Equal(t, int32(1), calls.Load())
+		assert.Equal(t, 5, captured.Load())
+	})
+}
+
+func TestNewLazyBoundFuncConcurrent(t *testing.T) {
+	t.Parallel()
+
+	var calls atomic.Int32
+	var captured atomic.Value
+	lazy := gsk.NewLazyBoundFunc(7, func(p int) int {
+		calls.Add(1)
+		captured.Store(p)
+		return p * 2
+	})
+
+	const goroutines = 100
+	var wg sync.WaitGroup
+	results := make(chan int, goroutines)
+
+	wg.Add(goroutines)
+	for range goroutines {
+		go func() {
+			defer wg.Done()
+			results <- lazy()
+		}()
+	}
+	wg.Wait()
+	close(results)
+
+	for got := range results {
+		assert.Equal(t, 14, got)
+	}
+	assert.Equal(t, int32(1), calls.Load())
+	assert.Equal(t, 7, captured.Load())
+}
+
 func ExampleNewLazyFunc() {
 	counter := 0
-	lazy := ga.NewLazyFunc(func() int {
+	lazy := gsk.NewLazyFunc(func() int {
 		counter++
 		return counter * 10
 	})
@@ -152,7 +210,7 @@ func ExampleNewLazyFunc() {
 
 func ExampleNewLazyParamFunc() {
 	calls := 0
-	lazy := ga.NewLazyParamFunc(func(p int) int {
+	lazy := gsk.NewLazyParamFunc(func(p int) int {
 		calls++
 		return p + calls
 	})
@@ -162,4 +220,18 @@ func ExampleNewLazyParamFunc() {
 	// Output:
 	// 2
 	// 2
+}
+
+func ExampleNewLazyBoundFunc() {
+	calls := 0
+	lazy := gsk.NewLazyBoundFunc(10, func(p int) int {
+		calls++
+		return p + calls
+	})
+
+	fmt.Println(lazy())
+	fmt.Println(lazy())
+	// Output:
+	// 11
+	// 11
 }

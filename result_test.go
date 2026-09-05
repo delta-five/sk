@@ -1,4 +1,4 @@
-package ga_test
+package gsk_test
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	ga "github.com/delta-five/gsk"
+	"github.com/delta-five/gsk"
 )
 
 func TestMakeResult(t *testing.T) {
@@ -20,7 +20,7 @@ func TestMakeResult(t *testing.T) {
 	t.Run("without error", func(t *testing.T) {
 		t.Parallel()
 
-		r := ga.MakeResult(42, nil)
+		r := gsk.MakeResult(42, nil)
 		val, err := r.Unwrap()
 		assert.Equal(t, 42, val)
 		assert.NoError(t, err)
@@ -29,7 +29,7 @@ func TestMakeResult(t *testing.T) {
 	t.Run("with error", func(t *testing.T) {
 		t.Parallel()
 
-		r := ga.MakeResult(0, assert.AnError)
+		r := gsk.MakeResult(0, assert.AnError)
 		val, err := r.Unwrap()
 		assert.Empty(t, val)
 		assert.ErrorIs(t, err, assert.AnError)
@@ -42,7 +42,7 @@ func TestMakePtrResult(t *testing.T) {
 	t.Run("without error", func(t *testing.T) {
 		t.Parallel()
 
-		r := ga.MakePtrResult[int](nil)
+		r := gsk.MakePtrResult[int](nil)
 		val, err := r.Unwrap()
 		require.NoError(t, err)
 		assert.NotNil(t, val)
@@ -51,7 +51,7 @@ func TestMakePtrResult(t *testing.T) {
 	t.Run("with error", func(t *testing.T) {
 		t.Parallel()
 
-		r := ga.MakePtrResult[int](assert.AnError)
+		r := gsk.MakePtrResult[int](assert.AnError)
 		val, err := r.Unwrap()
 		require.Nil(t, val)
 		assert.ErrorIs(t, err, assert.AnError)
@@ -63,18 +63,18 @@ func TestUnwrap(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		r       ga.Result[int]
+		r       gsk.Result[int]
 		want    int
 		wantErr error
 	}{
 		{
 			name: "with value",
-			r:    ga.MakeResult(42, nil),
+			r:    gsk.MakeResult(42, nil),
 			want: 42,
 		},
 		{
 			name:    "with error",
-			r:       ga.MakeResult(0, assert.AnError),
+			r:       gsk.MakeResult(0, assert.AnError),
 			wantErr: assert.AnError,
 		},
 	}
@@ -99,20 +99,20 @@ func TestResultMap(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		r       ga.Result[int]
+		r       gsk.Result[int]
 		mapper  func(int) string
 		want    string
 		wantErr error
 	}{
 		{
 			name:   "success",
-			r:      ga.MakeResult(21, nil),
+			r:      gsk.MakeResult(21, nil),
 			mapper: func(n int) string { return strconv.Itoa(n * 2) },
 			want:   "42",
 		},
 		{
 			name:    "error",
-			r:       ga.MakeResult(21, assert.AnError),
+			r:       gsk.MakeResult(21, assert.AnError),
 			mapper:  func(n int) string { return "should not run" },
 			wantErr: assert.AnError,
 		},
@@ -140,20 +140,20 @@ func TestResultMapSlice(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		r       ga.Result[[]int]
+		r       gsk.Result[[]int]
 		mapper  func(int) string
 		want    []string
 		wantErr error
 	}{
 		{
 			name:   "success",
-			r:      ga.MakeResult([]int{1, 2, 3}, nil),
+			r:      gsk.MakeResult([]int{1, 2, 3}, nil),
 			mapper: func(n int) string { return strconv.Itoa(n * n) },
 			want:   []string{"1", "4", "9"},
 		},
 		{
 			name:    "error",
-			r:       ga.MakeResult([]int(nil), assert.AnError),
+			r:       gsk.MakeResult([]int(nil), assert.AnError),
 			mapper:  func(n int) string { return "should not run" },
 			wantErr: assert.AnError,
 		},
@@ -163,7 +163,7 @@ func TestResultMapSlice(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := tt.r.Map(ga.NewSliceMapper(tt.mapper))
+			got := tt.r.Map(gsk.NewSliceMapper(tt.mapper))
 			val, err := got.Unwrap()
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)
@@ -183,26 +183,26 @@ func TestResultMapWithError(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		r       ga.Result[int]
+		r       gsk.Result[int]
 		mapper  func(int) (string, error)
 		want    string
 		wantErr error
 	}{
 		{
 			name:   "success",
-			r:      ga.MakeResult(21, nil),
+			r:      gsk.MakeResult(21, nil),
 			mapper: func(n int) (string, error) { return strconv.Itoa(n * 2), nil },
 			want:   "42",
 		},
 		{
 			name:    "mapper error",
-			r:       ga.MakeResult(21, nil),
+			r:       gsk.MakeResult(21, nil),
 			mapper:  func(n int) (string, error) { return "", mapperErr },
 			wantErr: mapperErr,
 		},
 		{
 			name:    "result error",
-			r:       ga.MakeResult(21, assert.AnError),
+			r:       gsk.MakeResult(21, assert.AnError),
 			mapper:  func(n int) (string, error) { return strconv.Itoa(n), nil },
 			wantErr: assert.AnError,
 		},
@@ -230,26 +230,26 @@ func TestResultMapSliceWithError(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		r       ga.Result[[]int]
+		r       gsk.Result[[]int]
 		mapper  func(int) (string, error)
 		want    []string
 		wantErr error
 	}{
 		{
 			name:   "success",
-			r:      ga.MakeResult([]int{1, 2, 3}, nil),
+			r:      gsk.MakeResult([]int{1, 2, 3}, nil),
 			mapper: func(n int) (string, error) { return strconv.Itoa(n), nil },
 			want:   []string{"1", "2", "3"},
 		},
 		{
 			name:    "mapper error",
-			r:       ga.MakeResult([]int{1, 2, 3}, nil),
+			r:       gsk.MakeResult([]int{1, 2, 3}, nil),
 			mapper:  func(n int) (string, error) { return "", assert.AnError },
 			wantErr: assert.AnError,
 		},
 		{
 			name:    "result error",
-			r:       ga.MakeResult([]int(nil), assert.AnError),
+			r:       gsk.MakeResult([]int(nil), assert.AnError),
 			mapper:  func(n int) (string, error) { return strconv.Itoa(n), nil },
 			wantErr: assert.AnError,
 		},
@@ -259,7 +259,7 @@ func TestResultMapSliceWithError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := tt.r.MapWithError(ga.NewSliceMapperWithError(tt.mapper))
+			got := tt.r.MapWithError(gsk.NewSliceMapperWithError(tt.mapper))
 			val, err := got.Unwrap()
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)
@@ -290,20 +290,20 @@ func TestResultMapSliceWithErrors(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		r       ga.Result[[]int]
+		r       gsk.Result[[]int]
 		mapper  func(int) (string, error)
 		want    []string
 		wantErr []error
 	}{
 		{
 			name:   "success",
-			r:      ga.MakeResult(slices.Sorted(maps.Keys(errMap)), nil),
+			r:      gsk.MakeResult(slices.Sorted(maps.Keys(errMap)), nil),
 			mapper: func(n int) (string, error) { return strconv.Itoa(n), nil },
 			want:   slices.Sorted(maps.Values(valMap)),
 		},
 		{
 			name: "mapper error",
-			r:    ga.MakeResult([]int{1, 2, 3}, nil),
+			r:    gsk.MakeResult([]int{1, 2, 3}, nil),
 			mapper: func(n int) (string, error) {
 				val, valOk := valMap[n]
 				require.True(t, valOk)
@@ -315,7 +315,7 @@ func TestResultMapSliceWithErrors(t *testing.T) {
 		},
 		{
 			name:    "result error",
-			r:       ga.MakeResult([]int(nil), assert.AnError),
+			r:       gsk.MakeResult([]int(nil), assert.AnError),
 			mapper:  func(n int) (string, error) { return strconv.Itoa(n), nil },
 			wantErr: []error{assert.AnError},
 		},
@@ -325,7 +325,7 @@ func TestResultMapSliceWithErrors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := tt.r.MapWithError(ga.NewSliceMapperWithErrors(tt.mapper))
+			got := tt.r.MapWithError(gsk.NewSliceMapperWithErrors(tt.mapper))
 			val, err := got.Unwrap()
 			if tt.wantErr != nil {
 				for _, e := range tt.wantErr {
@@ -347,7 +347,7 @@ func TestResultMapWithContext(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		r       ga.Result[int]
+		r       gsk.Result[int]
 		ctx     context.Context
 		mapper  func(context.Context, int) string
 		want    string
@@ -355,14 +355,14 @@ func TestResultMapWithContext(t *testing.T) {
 	}{
 		{
 			name:   "success",
-			r:      ga.MakeResult(21, nil),
+			r:      gsk.MakeResult(21, nil),
 			ctx:    context.Background(),
 			mapper: func(ctx context.Context, n int) string { return strconv.Itoa(n * 2) },
 			want:   "42",
 		},
 		{
 			name:    "error",
-			r:       ga.MakeResult(21, assert.AnError),
+			r:       gsk.MakeResult(21, assert.AnError),
 			ctx:     context.Background(),
 			mapper:  func(ctx context.Context, n int) string { return "should not run" },
 			wantErr: assert.AnError,
@@ -393,7 +393,7 @@ func TestResultMapWithContextError(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		r       ga.Result[int]
+		r       gsk.Result[int]
 		ctx     context.Context
 		mapper  func(context.Context, int) (string, error)
 		want    string
@@ -401,21 +401,21 @@ func TestResultMapWithContextError(t *testing.T) {
 	}{
 		{
 			name:   "success",
-			r:      ga.MakeResult(21, nil),
+			r:      gsk.MakeResult(21, nil),
 			ctx:    context.Background(),
 			mapper: func(ctx context.Context, n int) (string, error) { return strconv.Itoa(n * 2), nil },
 			want:   "42",
 		},
 		{
 			name:    "mapper error",
-			r:       ga.MakeResult(21, nil),
+			r:       gsk.MakeResult(21, nil),
 			ctx:     context.Background(),
 			mapper:  func(ctx context.Context, n int) (string, error) { return "", mapperErr },
 			wantErr: mapperErr,
 		},
 		{
 			name:    "result error",
-			r:       ga.MakeResult(21, assert.AnError),
+			r:       gsk.MakeResult(21, assert.AnError),
 			ctx:     context.Background(),
 			mapper:  func(ctx context.Context, n int) (string, error) { return strconv.Itoa(n), nil },
 			wantErr: assert.AnError,
@@ -444,17 +444,17 @@ func TestResultDo(t *testing.T) {
 
 	tests := []struct {
 		name string
-		r    ga.Result[int]
+		r    gsk.Result[int]
 		want []int
 	}{
 		{
 			name: "success",
-			r:    ga.MakeResult(42, nil),
+			r:    gsk.MakeResult(42, nil),
 			want: []int{42},
 		},
 		{
 			name: "error",
-			r:    ga.MakeResult(0, assert.AnError),
+			r:    gsk.MakeResult(0, assert.AnError),
 			want: []int{},
 		},
 	}
@@ -477,24 +477,24 @@ func TestResultDoWithError(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		r       ga.Result[int]
+		r       gsk.Result[int]
 		doer    func(int) error
 		wantErr error
 	}{
 		{
 			name: "success returns nil",
-			r:    ga.MakeResult(42, nil),
+			r:    gsk.MakeResult(42, nil),
 			doer: func(n int) error { return nil },
 		},
 		{
 			name:    "success returns error",
-			r:       ga.MakeResult(42, nil),
+			r:       gsk.MakeResult(42, nil),
 			doer:    func(n int) error { return doerErr },
 			wantErr: doerErr,
 		},
 		{
 			name:    "result error",
-			r:       ga.MakeResult(0, assert.AnError),
+			r:       gsk.MakeResult(0, assert.AnError),
 			doer:    func(n int) error { return nil },
 			wantErr: assert.AnError,
 		},
@@ -519,19 +519,19 @@ func TestResultDoWithContext(t *testing.T) {
 
 	tests := []struct {
 		name string
-		r    ga.Result[int]
+		r    gsk.Result[int]
 		ctx  context.Context
 		want []int
 	}{
 		{
 			name: "success",
-			r:    ga.MakeResult(42, nil),
+			r:    gsk.MakeResult(42, nil),
 			ctx:  context.Background(),
 			want: []int{42},
 		},
 		{
 			name: "error",
-			r:    ga.MakeResult(0, assert.AnError),
+			r:    gsk.MakeResult(0, assert.AnError),
 			ctx:  context.Background(),
 			want: []int{},
 		},
@@ -557,27 +557,27 @@ func TestResultDoWithContextError(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		r       ga.Result[int]
+		r       gsk.Result[int]
 		ctx     context.Context
 		doer    func(context.Context, int) error
 		wantErr error
 	}{
 		{
 			name: "success returns nil",
-			r:    ga.MakeResult(42, nil),
+			r:    gsk.MakeResult(42, nil),
 			ctx:  context.Background(),
 			doer: func(ctx context.Context, n int) error { return nil },
 		},
 		{
 			name:    "success returns error",
-			r:       ga.MakeResult(42, nil),
+			r:       gsk.MakeResult(42, nil),
 			ctx:     context.Background(),
 			doer:    func(ctx context.Context, n int) error { return doerErr },
 			wantErr: doerErr,
 		},
 		{
 			name:    "result error",
-			r:       ga.MakeResult(0, assert.AnError),
+			r:       gsk.MakeResult(0, assert.AnError),
 			ctx:     context.Background(),
 			doer:    func(ctx context.Context, n int) error { return nil },
 			wantErr: assert.AnError,

@@ -1,4 +1,4 @@
-package ga_test
+package gsk_test
 
 import (
 	"errors"
@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	ga "github.com/delta-five/gsk"
+	"github.com/delta-five/gsk"
 )
 
 func TestMapSlice(t *testing.T) {
@@ -38,7 +38,7 @@ func TestMapSlice(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got := ga.MapSlice(tt.in, tt.mapper)
+			got := gsk.MapSlice(tt.in, tt.mapper)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -85,7 +85,7 @@ func TestMapSliceError(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := ga.MapSliceWithError(tt.in, tt.mapper)
+			got, err := gsk.MapSliceWithError(tt.in, tt.mapper)
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)
 				assert.Nil(t, got)
@@ -155,7 +155,7 @@ func TestMapSliceErrors(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			got, err := ga.MapSliceWithErrors(tt.in, tt.mapper)
+			got, err := gsk.MapSliceWithErrors(tt.in, tt.mapper)
 			if len(tt.wantErrors) > 0 {
 				require.Error(t, err)
 				assert.Nil(t, got)
