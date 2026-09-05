@@ -43,7 +43,11 @@ func NewLazyParamFunc[P any, T any](generator ParamValFunc[P, T]) ParamValFunc[P
 	}
 }
 
-func NewLazyArgFunc[P any, T any](arg P, generator ParamValFunc[P, T]) ValFunc[T] {
+// NewLazyBoundFunc возвращает ленивую безаргументную функцию, которая при первом вызове передаёт arg генератору
+// и по сути является синтаксическим сахаром.
+// Результат генератора кэшируется и возвращается при всех последующих вызовах.
+// Безопасно для конкурентного использования.
+func NewLazyBoundFunc[P any, T any](arg P, generator ParamValFunc[P, T]) ValFunc[T] {
 	var (
 		once  sync.Once
 		value T
