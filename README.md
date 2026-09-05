@@ -1,14 +1,13 @@
-# GSK (Go Swiss Knife)
+# SK - Swiss Knife for Go
 
-The Swiss Army Knife for Go development  — библиотека вспомогательных функций общего назначения
-на дженериках.
+The Swiss Army Knife for Go development  — библиотека вспомогательных функций общего назначения.
 
 ```bash
-go get github.com/delta-five/gsk
+go get github.com/delta-five/sk
 ```
 
 ```go
-import "github.com/delta-five/gsk"
+import "github.com/delta-five/sk"
 ```
 
 ## Монада `Result`
@@ -19,25 +18,25 @@ import "github.com/delta-five/gsk"
 ### Конструкторы
 
 ```go
-r := gsk.MakeResult(42, nil)        // Result[int] со значением 42
-r := gsk.MakeResult(0, err)         // Result[int] с ошибкой err
-p := gsk.MakePtrResult[int](nil)    // Result[*int] с указателем на int
-p := gsk.MakePtrResult[int](err)    // Result[*int] с ошибкой err
+r := sk.MakeResult(42, nil)        // Result[int] со значением 42
+r := sk.MakeResult(0, err)         // Result[int] с ошибкой err
+p := sk.MakePtrResult[int](nil)    // Result[*int] с указателем на int
+p := sk.MakePtrResult[int](err)    // Result[*int] с ошибкой err
 ```
 
 ### Преобразования
 
 ```go
-res := gsk.MakeResult(21, nil).
+res := sk.MakeResult(21, nil).
 	Map(func(n int) string { return strconv.Itoa(n * 2) }) // "42"
 
-res := gsk.MakeResult(21, nil).
+res := sk.MakeResult(21, nil).
 	MapWithError(func(n int) (string, error) { return parse(n) })
 
-res := gsk.MakeResult(21, nil).
+res := sk.MakeResult(21, nil).
 	MapWithContext(ctx, func(c context.Context, n int) string { ... })
 
-res := gsk.MakeResult(21, nil).
+res := sk.MakeResult(21, nil).
 	MapWithContextError(ctx, func(c context.Context, n int) (string, error) { ... })
 ```
 
@@ -46,8 +45,8 @@ res := gsk.MakeResult(21, nil).
 Композиция с фабриками срезов:
 
 ```go
-r := gsk.MakeResult([]int{1, 2, 3}, nil).
-	Map(gsk.NewSliceMapper(func(n int) string { return strconv.Itoa(n) }))
+r := sk.MakeResult([]int{1, 2, 3}, nil).
+	Map(sk.NewSliceMapper(func(n int) string { return strconv.Itoa(n) }))
 ```
 
 ### Побочные эффекты
@@ -75,7 +74,7 @@ val, err := r.Unwrap()
 Применяет `mapper` к каждому элементу среза, возвращает новый срез (порядок и длина сохраняются).
 
 ```go
-out := gsk.MapSlice([]int{1, 2, 3}, func(n int) string { return strconv.Itoa(n * 2) })
+out := sk.MapSlice([]int{1, 2, 3}, func(n int) string { return strconv.Itoa(n * 2) })
 // out == []string{"2", "4", "6"}
 ```
 
@@ -84,7 +83,7 @@ out := gsk.MapSlice([]int{1, 2, 3}, func(n int) string { return strconv.Itoa(n *
 Как `MapSlice`, но прерывается на первой ошибке.
 
 ```go
-out, err := gsk.MapSliceWithError([]int{1, 2, 3}, func(n int) (int, error) {
+out, err := sk.MapSliceWithError([]int{1, 2, 3}, func(n int) (int, error) {
 	if n == 2 {
 		return 0, errors.New("boom")
 	}
@@ -99,7 +98,7 @@ out, err := gsk.MapSliceWithError([]int{1, 2, 3}, func(n int) (int, error) {
 и объединяет их через `errors.Join`.
 
 ```go
-out, err := gsk.MapSliceWithErrors([]int{1, 2, 3, 4}, func(n int) (int, error) {
+out, err := sk.MapSliceWithErrors([]int{1, 2, 3, 4}, func(n int) (int, error) {
 	if n%2 == 0 {
 		return 0, fmt.Errorf("ошибка для %d", n)
 	}
@@ -114,7 +113,7 @@ out, err := gsk.MapSliceWithErrors([]int{1, 2, 3, 4}, func(n int) (int, error) {
 преобразователь вида `func([]IN) ([]OUT, error)`, удобный для композиции с `Result`:
 
 ```go
-mapper := gsk.NewSliceMapperWithError(func(n int) (string, error) {
+mapper := sk.NewSliceMapperWithError(func(n int) (string, error) {
 	return strconv.Itoa(n), nil
 })
 out, err := mapper([]int{1, 2, 3}) // []string{"1", "2", "3"}, nil
@@ -128,7 +127,7 @@ out, err := mapper([]int{1, 2, 3}) // []string{"1", "2", "3"}, nil
 вызове), результат кэшируется. Безопасно для конкурентного использования.
 
 ```go
-lazy := gsk.NewLazyFunc(func() *sql.DB {
+lazy := sk.NewLazyFunc(func() *sql.DB {
 	db, _ := sql.Open("pgx", dsn)
 	return db
 })
@@ -143,7 +142,7 @@ db = lazy()  // последующие вызовы возвращают кэш�
 при первом вызове; результат кэшируется и возвращается при всех последующих вызовах.
 
 ```go
-lazy := gsk.NewLazyParamFunc(func(dsn string) *sql.DB {
+lazy := sk.NewLazyParamFunc(func(dsn string) *sql.DB {
 	db, _ := sql.Open("pgx", dsn)
 	return db
 })
@@ -159,7 +158,7 @@ db = lazy("другой dsn")       // возвращает кэшированн
 Безопасно для конкурентного использования.
 
 ```go
-lazy := gsk.NewLazyBoundFunc("postgres://...", func(dsn string) *sql.DB {
+lazy := sk.NewLazyBoundFunc("postgres://...", func(dsn string) *sql.DB {
 	db, _ := sql.Open("pgx", dsn)
 	return db
 })

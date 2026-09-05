@@ -1,4 +1,4 @@
-package gsk_test
+package sk_test
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/delta-five/gsk"
+	"github.com/delta-five/sk"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -33,7 +33,7 @@ func TestNewLazyFunc(t *testing.T) {
 			t.Parallel()
 
 			var calls atomic.Int32
-			lazy := gsk.NewLazyFunc(func() int {
+			lazy := sk.NewLazyFunc(func() int {
 				calls.Add(1)
 				return tt.want
 			})
@@ -54,7 +54,7 @@ func TestNewLazyFuncConcurrent(t *testing.T) {
 	t.Parallel()
 
 	var calls atomic.Int32
-	lazy := gsk.NewLazyFunc(func() int {
+	lazy := sk.NewLazyFunc(func() int {
 		calls.Add(1)
 		return 42
 	})
@@ -87,7 +87,7 @@ func TestNewLazyParamFunc(t *testing.T) {
 
 		var calls atomic.Int32
 		var captured atomic.Value
-		lazy := gsk.NewLazyParamFunc(func(p int) int {
+		lazy := sk.NewLazyParamFunc(func(p int) int {
 			calls.Add(1)
 			captured.Store(p)
 			return p * 2
@@ -110,7 +110,7 @@ func TestNewLazyParamFuncConcurrent(t *testing.T) {
 
 	var calls atomic.Int32
 	var captured atomic.Value
-	lazy := gsk.NewLazyParamFunc(func(p int) int {
+	lazy := sk.NewLazyParamFunc(func(p int) int {
 		calls.Add(1)
 		captured.Store(p)
 		return p * 2
@@ -144,7 +144,7 @@ func TestNewLazyBoundFunc(t *testing.T) {
 
 		var calls atomic.Int32
 		var captured atomic.Value
-		lazy := gsk.NewLazyBoundFunc(5, func(p int) int {
+		lazy := sk.NewLazyBoundFunc(5, func(p int) int {
 			calls.Add(1)
 			captured.Store(p)
 			return p * 2
@@ -167,7 +167,7 @@ func TestNewLazyBoundFuncConcurrent(t *testing.T) {
 
 	var calls atomic.Int32
 	var captured atomic.Value
-	lazy := gsk.NewLazyBoundFunc(7, func(p int) int {
+	lazy := sk.NewLazyBoundFunc(7, func(p int) int {
 		calls.Add(1)
 		captured.Store(p)
 		return p * 2
@@ -196,7 +196,7 @@ func TestNewLazyBoundFuncConcurrent(t *testing.T) {
 
 func ExampleNewLazyFunc() {
 	counter := 0
-	lazy := gsk.NewLazyFunc(func() int {
+	lazy := sk.NewLazyFunc(func() int {
 		counter++
 		return counter * 10
 	})
@@ -210,7 +210,7 @@ func ExampleNewLazyFunc() {
 
 func ExampleNewLazyParamFunc() {
 	calls := 0
-	lazy := gsk.NewLazyParamFunc(func(p int) int {
+	lazy := sk.NewLazyParamFunc(func(p int) int {
 		calls++
 		return p + calls
 	})
@@ -224,7 +224,7 @@ func ExampleNewLazyParamFunc() {
 
 func ExampleNewLazyBoundFunc() {
 	calls := 0
-	lazy := gsk.NewLazyBoundFunc(10, func(p int) int {
+	lazy := sk.NewLazyBoundFunc(10, func(p int) int {
 		calls++
 		return p + calls
 	})

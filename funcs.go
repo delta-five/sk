@@ -1,4 +1,4 @@
-package gsk
+package sk
 
 import "errors"
 
