@@ -16,28 +16,12 @@ func MakeResult[T any](val T, err error) Result[T] {
 	return Result[T]{val: val, err: err}
 }
 
-// MustMake создаёт T из значения val или вызывает панику при ошибке err.
-func MustMake[T any](val T, err error) T {
-	if err != nil {
-		panic(err)
-	}
-	return val
-}
-
 // MakePtrResult создаёт Result с указателем на переменную с типом параметра при пустом аргументе-ошибки.
 func MakePtrResult[T any](err error) Result[*T] {
 	if err == nil {
 		return Result[*T]{val: new(T)}
 	}
 	return Result[*T]{err: err}
-}
-
-// MustMakePtr создаёт указатель *T или вызывает панику при ошибке err.
-func MustMakePtr[T any](err error) *T {
-	if err != nil {
-		panic(err)
-	}
-	return new(T)
 }
 
 // Unwrap возвращает хранимое значение и ошибку.
@@ -117,4 +101,42 @@ func (r *Result[IN]) DoWithContextError(ctx context.Context, doer func(context.C
 	}
 
 	return r.err
+}
+
+// Value возвращает хранимое значение. При наличии ошибки возвращается нулевое значение типа T.
+func (r *Result[T]) Value() (result T) {
+	return r.val
+}
+
+// IsValid возвращает true, если ошибки нет.
+func (r *Result[T]) IsValid() bool {
+	return r.err == nil
+}
+
+// OrEmpty возвращает хранимое значение, либо нулевое значение типа T при наличии ошибки.
+func (r *Result[T]) OrEmpty() (result T) {
+	if r.err == nil {
+		result = r.val
+	}
+
+	return result
+}
+
+// OrValue возвращает хранимое значение, либо переданное значение val при наличии ошибки.
+func (r *Result[T]) OrValue(val T) T {
+	if r.err == nil {
+		return r.val
+	}
+
+	return val
+}
+
+// OrElse возвращает хранимое значение, либо результат вызова generator при наличии ошибки.
+// generator вызывается только при наличии ошибки.
+func (r *Result[T]) OrElse(generator func() T) T {
+	if r.err == nil {
+		return r.val
+	}
+
+	return generator()
 }

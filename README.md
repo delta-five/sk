@@ -26,11 +26,11 @@ p := sk.MakePtrResult[int](err)    // Result[*int] с ошибкой err
 
 ### Распаковка значения
 
-`MustMake` и `MustMakePtr` извлекают значение, вызывая панику при ошибке:
+`MustMake` и `MustAllocate` извлекают значение, вызывая панику при ошибке:
 
 ```go
-v := sk.MustMake(fetch())      // v типа int; паника при err != nil
-p := sk.MustMakePtr[int](err)  // p типа *int; паника при err != nil
+v := sk.MustMake(fetch())        // v типа int; паника при err != nil
+p := sk.MustAllocate[int](err)   // p типа *int; паника при err != nil
 ```
 
 ### Преобразования
@@ -74,6 +74,78 @@ err := r.DoWithContextError(ctx, func(c context.Context, n int) error { ... })
 
 ```go
 val, err := r.Unwrap()
+```
+
+Помимо `Unwrap` доступны методы извлечения значения без паники:
+
+| Метод | Поведение |
+| --- | --- |
+| `Value()` | Возвращает хранимое значение (нулевое значение типа при ошибке) |
+| `IsValid()` | `true`, если ошибки нет |
+| `OrEmpty()` | Хранимое значение либо нулевое значение типа при ошибке |
+| `OrValue(v)` | Хранимое значение либо переданное `v` при ошибке |
+| `OrElse(gen)` | Хранимое значение либо результат `gen()` при ошибке (вызывается только при ошибке) |
+
+```go
+r := sk.MakeResult(42, nil)
+r.Value()    // 42
+r.IsValid()  // true
+r.OrEmpty()  // 42
+r.OrValue(7) // 42
+
+failed := sk.MakeResult(0, err)
+failed.Value()    // 0
+failed.IsValid()  // false
+failed.OrEmpty()  // 0
+failed.OrValue(7) // 7
+failed.OrElse(func() int { return 99 }) // 99
+```
+
+## Монада `Option`
+
+Контейнер необязательного значения с признаком наличия `Ok`.
+
+```go
+type Option[T any] struct {
+	Val T
+	Ok  bool
+}
+```
+
+### Конструкторы
+
+```go
+o := sk.MakeOption(42, true)        // Option[int] со значением 42
+o := sk.MakeEmptyOption[int]()      // пустой Option[int]
+
+val := 42
+o := sk.MakeDerefOption(&val)        // Option[int] со значением 42
+o := sk.MakeDerefOption((*int)(nil)) // пустой Option[int]
+```
+
+### Извлечение значения
+
+| Метод | Поведение |
+| --- | --- |
+| `Value()` | Хранимое значение (нулевое значение типа, если отсутствует) |
+| `IsValid()` | `true`, если значение присутствует |
+| `OrEmpty()` | Хранимое значение либо нулевое значение типа |
+| `OrValue(v)` | Хранимое значение либо переданное `v` |
+| `OrElse(gen)` | Хранимое значение либо результат `gen()` (вызывается только при отсутствии) |
+
+```go
+o := sk.MakeOption(42, true)
+o.Value()    // 42
+o.IsValid()  // true
+o.OrEmpty()  // 42
+o.OrValue(7) // 42
+
+empty := sk.MakeEmptyOption[int]()
+empty.Value()    // 0
+empty.IsValid()  // false
+empty.OrEmpty()  // 0
+empty.OrValue(7) // 7
+empty.OrElse(func() int { return 99 }) // 99
 ```
 
 ## Работа со срезами
@@ -174,4 +246,18 @@ lazy := sk.NewLazyBoundFunc("postgres://...", func(dsn string) *sql.DB {
 
 db := lazy() // первый вызов — инициализация с зафиксированным dsn
 db = lazy()  // последующие вызовы возвращают кэшированное значение
+```
+
+## Утилиты
+
+### `DerefOrEmpty`
+
+Безопасно разыменовывает указатель: при `nil` возвращает нулевое значение типа `T`.
+
+```go
+val := 42
+sk.DerefOrEmpty(&val)     // 42
+
+var p *int
+sk.DerefOrEmpty(p)        // 0
 ```
