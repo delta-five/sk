@@ -3,6 +3,7 @@ package sk_test
 import (
 	"context"
 	"errors"
+	"fmt"
 	"maps"
 	"slices"
 	"strconv"
@@ -55,13 +56,13 @@ func TestMustMake(t *testing.T) {
 	})
 }
 
-func TestMustMakePtr(t *testing.T) {
+func TestMustAllocate(t *testing.T) {
 	t.Parallel()
 
 	t.Run("without error", func(t *testing.T) {
 		t.Parallel()
 
-		p := sk.MustMakePtr[int](nil)
+		p := sk.MustAllocate[int](nil)
 		require.NotNil(t, p)
 		assert.Equal(t, 0, *p)
 	})
@@ -70,7 +71,7 @@ func TestMustMakePtr(t *testing.T) {
 		t.Parallel()
 
 		assert.PanicsWithValue(t, assert.AnError, func() {
-			sk.MustMakePtr[int](assert.AnError)
+			sk.MustAllocate[int](assert.AnError)
 		})
 	})
 }
@@ -587,6 +588,179 @@ func TestResultDoWithContext(t *testing.T) {
 			assert.Equal(t, tt.want, captured)
 		})
 	}
+}
+
+func TestResultValue(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		r    sk.Result[int]
+		want int
+	}{
+		{
+			name: "with value",
+			r:    sk.MakeResult(42, nil),
+			want: 42,
+		},
+		{
+			name: "with error",
+			r:    sk.MakeResult(42, assert.AnError),
+			want: 42,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			assert.Equal(t, tt.want, tt.r.Value())
+		})
+	}
+}
+
+func TestResultIsValid(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		r    sk.Result[int]
+		want bool
+	}{
+		{
+			name: "without error",
+			r:    sk.MakeResult(42, nil),
+			want: true,
+		},
+		{
+			name: "with error",
+			r:    sk.MakeResult(0, assert.AnError),
+			want: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			assert.Equal(t, tt.want, tt.r.IsValid())
+		})
+	}
+}
+
+func TestResultOrEmpty(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		r    sk.Result[int]
+		want int
+	}{
+		{
+			name: "without error",
+			r:    sk.MakeResult(42, nil),
+			want: 42,
+		},
+		{
+			name: "with error",
+			r:    sk.MakeResult(42, assert.AnError),
+			want: 0,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			assert.Equal(t, tt.want, tt.r.OrEmpty())
+		})
+	}
+}
+
+func TestResultOrValue(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name string
+		r    sk.Result[int]
+		val  int
+		want int
+	}{
+		{
+			name: "without error",
+			r:    sk.MakeResult(42, nil),
+			val:  7,
+			want: 42,
+		},
+		{
+			name: "with error",
+			r:    sk.MakeResult(42, assert.AnError),
+			val:  7,
+			want: 7,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			assert.Equal(t, tt.want, tt.r.OrValue(tt.val))
+		})
+	}
+}
+
+func TestResultOrElse(t *testing.T) {
+	t.Parallel()
+
+	t.Run("without error does not call generator", func(t *testing.T) {
+		t.Parallel()
+
+		called := false
+		r := sk.MakeResult(42, nil)
+		got := r.OrElse(func() int {
+			called = true
+			return 7
+		})
+
+		assert.Equal(t, 42, got)
+		assert.False(t, called)
+	})
+
+	t.Run("with error calls generator", func(t *testing.T) {
+		t.Parallel()
+
+		called := false
+		r := sk.MakeResult(0, assert.AnError)
+		got := r.OrElse(func() int {
+			called = true
+			return 7
+		})
+
+		assert.Equal(t, 7, got)
+		assert.True(t, called)
+	})
+}
+
+func ExampleResult_OrValue() {
+	ok := sk.MakeResult(42, nil)
+	fmt.Println(ok.OrValue(7))
+
+	failed := sk.MakeResult(0, errors.New("boom"))
+	fmt.Println(failed.OrValue(7))
+	// Output:
+	// 42
+	// 7
+}
+
+func ExampleResult_OrEmpty() {
+	ok := sk.MakeResult(42, nil)
+	fmt.Println(ok.OrEmpty())
+
+	failed := sk.MakeResult(0, errors.New("boom"))
+	fmt.Println(failed.OrEmpty())
+	// Output:
+	// 42
+	// 0
 }
 
 func TestResultDoWithContextError(t *testing.T) {
