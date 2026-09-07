@@ -32,14 +32,6 @@ func MakePtrResult[T any](err error) Result[*T] {
 	return Result[*T]{err: err}
 }
 
-// MustMakePtr создаёт указатель *T или вызывает панику при ошибке err.
-func MustMakePtr[T any](err error) *T {
-	if err != nil {
-		panic(err)
-	}
-	return new(T)
-}
-
 // Unwrap возвращает хранимое значение и ошибку.
 func (r *Result[IN]) Unwrap() (IN, error) {
 	return r.val, r.err
@@ -117,4 +109,36 @@ func (r *Result[IN]) DoWithContextError(ctx context.Context, doer func(context.C
 	}
 
 	return r.err
+}
+
+func (r *Result[T]) Value() (result T) {
+	return r.val
+}
+
+func (r *Result[T]) IsValid() bool {
+	return r.err == nil
+}
+
+func (r *Result[T]) OrEmpty() (result T) {
+	if r.err == nil {
+		result = r.val
+	}
+
+	return result
+}
+
+func (r *Result[T]) OrValue(val T) T {
+	if r.err == nil {
+		return r.val
+	}
+
+	return val
+}
+
+func (r *Result[T]) OrMake(generator func() T) T {
+	if r.err == nil {
+		return r.val
+	}
+
+	return generator()
 }
