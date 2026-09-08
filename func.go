@@ -1,5 +1,13 @@
 package sk
 
+// MustDo проверяет, не является ли аргумент ошибкой, и в противном случае выдает ошибку.
+// Обычно аргумент передается напрямую как результат вызова другого метода.
+func MustDo(err error) {
+	if err != nil {
+		panic(err)
+	}
+}
+
 // MustMake создаёт T из значения val или вызывает панику при ошибке err.
 func MustMake[T any](val T, err error) T {
 	if err != nil {

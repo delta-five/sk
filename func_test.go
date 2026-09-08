@@ -37,3 +37,26 @@ func ExampleDerefOrEmpty() {
 	// 42
 	// 0
 }
+
+func TestMustDo(t *testing.T) {
+	t.Parallel()
+
+	assert.NotPanics(t, func() {
+		sk.MustDo(nil)
+	})
+
+	assert.Panics(t, func() {
+		sk.MustDo(assert.AnError)
+	})
+}
+
+func ExampleMustDo() {
+	sk.MustDo(func() error {
+		fmt.Println("No error inside call")
+
+		return nil
+	}())
+
+	// Output:
+	// No error inside call
+}
