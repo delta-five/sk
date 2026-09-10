@@ -227,6 +227,17 @@ func TestOptionOrElse(t *testing.T) {
 	})
 }
 
+func TestOptionCallChain(t *testing.T) {
+	t.Parallel()
+
+	val := 42
+	assert.Equal(t, 42, sk.MakeDerefOption(&val).OrEmpty())
+	assert.Equal(t, 42, sk.MakeOption(42, true).Value())
+	assert.True(t, sk.MakeOption(42, true).IsValid())
+	assert.Equal(t, 42, sk.MakeOption(42, true).OrValue(7))
+	assert.Equal(t, 99, sk.MakeEmptyOption[int]().OrElse(func() int { return 99 }))
+}
+
 func ExampleMakeOption() {
 	opt := sk.MakeOption(42, true)
 	fmt.Println(opt.Value(), opt.IsValid())
