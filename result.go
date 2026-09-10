@@ -25,12 +25,12 @@ func MakePtrResult[T any](err error) Result[*T] {
 }
 
 // Unwrap возвращает хранимое значение и ошибку.
-func (r *Result[IN]) Unwrap() (IN, error) {
+func (r Result[IN]) Unwrap() (IN, error) {
 	return r.val, r.err
 }
 
 // Map применяет mapper к значению, если ошибки нет. При наличии ошибки возвращает Result с той же ошибкой.
-func (r *Result[IN]) Map[OUT any](mapper func(IN) OUT) Result[OUT] {
+func (r Result[IN]) Map[OUT any](mapper func(IN) OUT) Result[OUT] {
 	if r.err != nil {
 		return Result[OUT]{err: r.err}
 	}
@@ -40,7 +40,7 @@ func (r *Result[IN]) Map[OUT any](mapper func(IN) OUT) Result[OUT] {
 
 // MapWithError применяет mapper к значению, если ошибки нет, и возвращает результат вызова mapper.
 // При наличии исходной ошибки возвращает Result с той же ошибкой, не вызывая mapper.
-func (r *Result[IN]) MapWithError[OUT any](mapper func(IN) (OUT, error)) Result[OUT] {
+func (r Result[IN]) MapWithError[OUT any](mapper func(IN) (OUT, error)) Result[OUT] {
 	if r.err != nil {
 		return Result[OUT]{err: r.err}
 	}
@@ -50,7 +50,7 @@ func (r *Result[IN]) MapWithError[OUT any](mapper func(IN) (OUT, error)) Result[
 
 // MapWithContext применяет mapper к значению и контексту ctx, если ошибки нет.
 // При наличии ошибки возвращает Result с той же ошибкой, не вызывая mapper.
-func (r *Result[IN]) MapWithContext[OUT any](ctx context.Context, mapper func(context.Context, IN) OUT) Result[OUT] {
+func (r Result[IN]) MapWithContext[OUT any](ctx context.Context, mapper func(context.Context, IN) OUT) Result[OUT] {
 	if r.err != nil {
 		return Result[OUT]{err: r.err}
 	}
@@ -60,7 +60,7 @@ func (r *Result[IN]) MapWithContext[OUT any](ctx context.Context, mapper func(co
 
 // MapWithContextError применяет mapper к значению и контексту ctx, если ошибки нет, и возвращает результат вызова mapper.
 // При наличии исходной ошибки возвращает Result с той же ошибкой, не вызывая mapper.
-func (r *Result[IN]) MapWithContextError[OUT any](ctx context.Context, mapper func(context.Context, IN) (OUT, error)) Result[OUT] {
+func (r Result[IN]) MapWithContextError[OUT any](ctx context.Context, mapper func(context.Context, IN) (OUT, error)) Result[OUT] {
 	if r.err != nil {
 		return Result[OUT]{err: r.err}
 	}
@@ -69,7 +69,7 @@ func (r *Result[IN]) MapWithContextError[OUT any](ctx context.Context, mapper fu
 }
 
 // Do вызывает doer со значением, если ошибки нет. При наличии ошибки ничего не делает.
-func (r *Result[IN]) Do(doer func(IN)) {
+func (r Result[IN]) Do(doer func(IN)) {
 	if r.err == nil {
 		doer(r.val)
 	}
@@ -77,7 +77,7 @@ func (r *Result[IN]) Do(doer func(IN)) {
 
 // DoWithError вызывает doer со значением, если ошибки нет, и возвращает результат его вызова.
 // При наличии исходной ошибки возвращает эту ошибку, не вызывая doer.
-func (r *Result[IN]) DoWithError(doer func(IN) error) error {
+func (r Result[IN]) DoWithError(doer func(IN) error) error {
 	if r.err == nil {
 		return doer(r.val)
 	}
@@ -87,7 +87,7 @@ func (r *Result[IN]) DoWithError(doer func(IN) error) error {
 
 // DoWithContext вызывает doer со значением и контекстом ctx, если ошибки нет.
 // При наличии ошибки ничего не делает.
-func (r *Result[IN]) DoWithContext(ctx context.Context, doer func(context.Context, IN)) {
+func (r Result[IN]) DoWithContext(ctx context.Context, doer func(context.Context, IN)) {
 	if r.err == nil {
 		doer(ctx, r.val)
 	}
@@ -95,7 +95,7 @@ func (r *Result[IN]) DoWithContext(ctx context.Context, doer func(context.Contex
 
 // DoWithContextError вызывает doer со значением и контекстом ctx, если ошибки нет, и возвращает результат его вызова.
 // При наличии исходной ошибки возвращает эту ошибку, не вызывая doer.
-func (r *Result[IN]) DoWithContextError(ctx context.Context, doer func(context.Context, IN) error) error {
+func (r Result[IN]) DoWithContextError(ctx context.Context, doer func(context.Context, IN) error) error {
 	if r.err == nil {
 		return doer(ctx, r.val)
 	}
@@ -104,17 +104,17 @@ func (r *Result[IN]) DoWithContextError(ctx context.Context, doer func(context.C
 }
 
 // Value возвращает хранимое значение. При наличии ошибки возвращается нулевое значение типа T.
-func (r *Result[T]) Value() (result T) {
+func (r Result[T]) Value() (result T) {
 	return r.val
 }
 
 // IsValid возвращает true, если ошибки нет.
-func (r *Result[T]) IsValid() bool {
+func (r Result[T]) IsValid() bool {
 	return r.err == nil
 }
 
 // OrEmpty возвращает хранимое значение, либо нулевое значение типа T при наличии ошибки.
-func (r *Result[T]) OrEmpty() (result T) {
+func (r Result[T]) OrEmpty() (result T) {
 	if r.err == nil {
 		result = r.val
 	}
@@ -123,7 +123,7 @@ func (r *Result[T]) OrEmpty() (result T) {
 }
 
 // OrValue возвращает хранимое значение, либо переданное значение val при наличии ошибки.
-func (r *Result[T]) OrValue(val T) T {
+func (r Result[T]) OrValue(val T) T {
 	if r.err == nil {
 		return r.val
 	}
@@ -133,7 +133,7 @@ func (r *Result[T]) OrValue(val T) T {
 
 // OrElse возвращает хранимое значение, либо результат вызова generator при наличии ошибки.
 // generator вызывается только при наличии ошибки.
-func (r *Result[T]) OrElse(generator func() T) T {
+func (r Result[T]) OrElse(generator func() T) T {
 	if r.err == nil {
 		return r.val
 	}

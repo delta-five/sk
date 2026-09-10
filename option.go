@@ -7,12 +7,12 @@ type Option[T any] struct {
 }
 
 // Value возвращает хранимое значение. Если значение отсутствует, возвращается нулевое значение типа T.
-func (o *Option[T]) Value() T {
+func (o Option[T]) Value() T {
 	return o.Val
 }
 
 // IsValid возвращает true, если значение присутствует.
-func (o *Option[T]) IsValid() bool {
+func (o Option[T]) IsValid() bool {
 	return o.Ok
 }
 
@@ -35,7 +35,7 @@ func MakeEmptyOption[T any]() Option[T] {
 }
 
 // OrEmpty возвращает хранимое значение, либо нулевое значение типа T, если значение отсутствует.
-func (o *Option[T]) OrEmpty() (result T) {
+func (o Option[T]) OrEmpty() (result T) {
 	if o.Ok {
 		return o.Val
 	}
@@ -44,7 +44,7 @@ func (o *Option[T]) OrEmpty() (result T) {
 }
 
 // OrValue возвращает хранимое значение, либо переданное значение val, если значение отсутствует.
-func (o *Option[T]) OrValue(val T) T {
+func (o Option[T]) OrValue(val T) T {
 	if o.Ok {
 		return o.Val
 	}
@@ -54,7 +54,7 @@ func (o *Option[T]) OrValue(val T) T {
 
 // OrElse возвращает хранимое значение, либо результат вызова generator, если значение отсутствует.
 // generator вызывается только при отсутствии значения.
-func (o *Option[T]) OrElse(generator func() T) T {
+func (o Option[T]) OrElse(generator func() T) T {
 	if o.Ok {
 		return o.Val
 	}

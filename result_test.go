@@ -741,6 +741,23 @@ func TestResultOrElse(t *testing.T) {
 	})
 }
 
+func BenchmarkResultCallChain(b *testing.B) {
+	b.ReportAllocs()
+
+	var (
+		got string
+		err error
+	)
+	for b.Loop() {
+		got, err = sk.MakeResult(42, nil).
+			Map(strconv.Itoa).
+			Unwrap()
+	}
+
+	require.NoError(b, err)
+	assert.Equal(b, "42", got)
+}
+
 func ExampleResult_OrValue() {
 	ok := sk.MakeResult(42, nil)
 	fmt.Println(ok.OrValue(7))
